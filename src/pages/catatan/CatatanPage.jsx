@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, FileText, Edit3, Trash2, Search, X } from 'lucide-react';
 import { Header } from '../../components/navigation/Header';
-import { Card, Button, Input, TextArea, Modal, ConfirmModal, Alert } from '../../components/ui';
+import { Card, Button, Input, TextArea, Modal, ConfirmModal } from '../../components/ui';
 import { useNotesStore } from '../../store';
 import { formatDate } from '../../utils/helpers';
 
@@ -13,7 +13,6 @@ export function CatatanPage() {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Form state
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [errors, setErrors] = useState({});
@@ -73,22 +72,9 @@ export function CatatanPage() {
       setDeleteConfirm(null);
     }
   };
-  
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.05 }
-    }
-  };
-  
-  const itemVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0 }
-  };
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
+    <div className="page-wrapper">
       <Header 
         title="Catatan Proyek" 
         subtitle={`${notes.length} catatan`}
@@ -99,7 +85,7 @@ export function CatatanPage() {
         }
       />
       
-      <div className="flex-1 overflow-y-auto pb-24">
+      <div className="page-scroll pb-nav">
         <div className="max-w-lg mx-auto px-4 py-4 space-y-4">
           {/* Search */}
           {notes.length > 0 && (
@@ -108,18 +94,19 @@ export function CatatanPage() {
               animate={{ opacity: 1, y: 0 }}
             >
               <div className="relative">
-                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
+                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
                   type="text"
                   placeholder="Cari catatan..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-11 pr-4 py-3 rounded-xl bg-surface border-2 border-border focus:border-primary-500 transition-colors text-foreground placeholder:text-muted/60"
+                  className="w-full pl-11 pr-4 py-3 rounded-xl bg-white border-2 border-slate-200 focus:border-blue-500 transition-colors text-slate-800 placeholder:text-slate-400 outline-none"
                 />
                 {searchQuery && (
                   <button
+                    type="button"
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-foreground"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 active:text-slate-600"
                   >
                     <X size={18} />
                   </button>
@@ -138,8 +125,8 @@ export function CatatanPage() {
               <div className="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <FileText size={32} className="text-amber-500" />
               </div>
-              <h3 className="font-bold text-foreground mb-2">Belum Ada Catatan</h3>
-              <p className="text-muted text-sm mb-4">
+              <h3 className="font-bold text-slate-800 mb-2">Belum Ada Catatan</h3>
+              <p className="text-slate-500 text-sm mb-4">
                 Mulai catat progres atau kebutuhan proyek Anda
               </p>
               <Button onClick={handleOpenAdd}>
@@ -152,37 +139,41 @@ export function CatatanPage() {
           {/* Notes List */}
           {filteredNotes.length > 0 && (
             <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              animate="visible"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               className="space-y-3"
             >
-              {filteredNotes.map((note) => (
-                <motion.div key={note.id} variants={itemVariants}>
+              {filteredNotes.map((note, index) => (
+                <motion.div 
+                  key={note.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.03 }}
+                >
                   <Card className="p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-foreground truncate">{note.title}</h3>
-                        <p className="text-sm text-muted mt-1 line-clamp-2">{note.content}</p>
-                        <p className="text-xs text-muted/70 mt-2">
+                        <h3 className="font-bold text-slate-800 truncate">{note.title}</h3>
+                        <p className="text-sm text-slate-500 mt-1 line-clamp-2">{note.content}</p>
+                        <p className="text-xs text-slate-400 mt-2">
                           {formatDate(note.updatedAt)}
                         </p>
                       </div>
                       <div className="flex gap-1">
-                        <motion.button
+                        <button
+                          type="button"
                           onClick={() => handleOpenEdit(note)}
-                          className="p-2 rounded-lg hover:bg-surface-dark active:bg-border transition-colors"
-                          whileTap={{ scale: 0.9 }}
+                          className="p-2 rounded-lg active:bg-slate-100 transition-colors"
                         >
-                          <Edit3 size={18} className="text-primary-600" />
-                        </motion.button>
-                        <motion.button
+                          <Edit3 size={18} className="text-blue-600" />
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => setDeleteConfirm(note)}
-                          className="p-2 rounded-lg hover:bg-red-50 active:bg-red-100 transition-colors"
-                          whileTap={{ scale: 0.9 }}
+                          className="p-2 rounded-lg active:bg-red-50 transition-colors"
                         >
-                          <Trash2 size={18} className="text-danger" />
-                        </motion.button>
+                          <Trash2 size={18} className="text-red-500" />
+                        </button>
                       </div>
                     </div>
                   </Card>
@@ -194,7 +185,7 @@ export function CatatanPage() {
           {/* No Search Results */}
           {notes.length > 0 && filteredNotes.length === 0 && searchQuery && (
             <div className="text-center py-8">
-              <p className="text-muted">Tidak ada catatan yang cocok dengan "{searchQuery}"</p>
+              <p className="text-slate-500">Tidak ada catatan yang cocok dengan "{searchQuery}"</p>
             </div>
           )}
         </div>

@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState, useRef } from 'react';
-import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion';
+import { useCallback, useState, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigationStore } from './store';
 import { BottomNav } from './components/navigation/BottomNav';
 import { HomePage } from './pages/home';
@@ -23,38 +23,58 @@ function App() {
   const [isAnimating, setIsAnimating] = useState(false);
   const containerRef = useRef(null);
   
-  // Swipe detection
+  // Swipe detection - hanya di area bebas, tidak di form/button
   const touchStartX = useRef(0);
+  const touchStartY = useRef(0);
   const touchEndX = useRef(0);
+  const touchEndY = useRef(0);
+  const isSwiping = useRef(false);
   
   const handleTouchStart = useCallback((e) => {
+    // Skip swipe jika target adalah input, button, atau elemen interaktif
+    const target = e.target;
+    const interactiveElements = ['INPUT', 'BUTTON', 'TEXTAREA', 'SELECT', 'A'];
+    if (interactiveElements.includes(target.tagName)) return;
+    if (target.closest('button') || target.closest('input') || target.closest('[role="button"]')) return;
+    
     touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+    isSwiping.current = true;
   }, []);
   
   const handleTouchMove = useCallback((e) => {
+    if (!isSwiping.current) return;
     touchEndX.current = e.touches[0].clientX;
+    touchEndY.current = e.touches[0].clientY;
   }, []);
   
   const handleTouchEnd = useCallback(() => {
-    if (isAnimating) return;
+    if (!isSwiping.current || isAnimating) {
+      isSwiping.current = false;
+      return;
+    }
     
-    const diff = touchStartX.current - touchEndX.current;
-    const threshold = 80; // Minimum swipe distance
+    const diffX = touchStartX.current - touchEndX.current;
+    const diffY = Math.abs(touchStartY.current - touchEndY.current);
+    const threshold = 100; // Minimum swipe distance
     
-    if (Math.abs(diff) < threshold) return;
+    // Hanya swipe horizontal, abaikan jika vertical scroll dominan
+    if (Math.abs(diffX) < threshold || diffY > Math.abs(diffX)) {
+      isSwiping.current = false;
+      return;
+    }
     
     const currentIndex = pages.indexOf(currentPage);
     
-    if (diff > 0 && currentIndex < pages.length - 1) {
-      // Swipe left - go to next page
+    if (diffX > 0 && currentIndex < pages.length - 1) {
       setPage(pages[currentIndex + 1]);
-    } else if (diff < 0 && currentIndex > 0) {
-      // Swipe right - go to previous page
+    } else if (diffX < 0 && currentIndex > 0) {
       setPage(pages[currentIndex - 1]);
     }
+    
+    isSwiping.current = false;
   }, [currentPage, setPage, isAnimating]);
   
-  // Page transition variants
   const pageVariants = {
     enter: (direction) => ({
       x: direction > 0 ? '100%' : '-100%',
@@ -71,23 +91,22 @@ function App() {
   };
   
   const pageTransition = {
-    type: 'spring',
-    stiffness: 300,
-    damping: 30,
+    type: 'tween',
+    duration: 0.25,
+    ease: 'easeInOut',
   };
   
   const PageComponent = pageComponents[currentPage];
 
   return (
     <div 
-      className="h-full w-full overflow-hidden bg-background flex flex-col"
+      className="app-container"
       ref={containerRef}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Main Content Area */}
-      <div className="flex-1 relative overflow-hidden">
+      <div className="app-content">
         <AnimatePresence 
           mode="wait" 
           custom={direction}
@@ -103,14 +122,13 @@ function App() {
             transition={pageTransition}
             onAnimationStart={() => setIsAnimating(true)}
             onAnimationComplete={() => setIsAnimating(false)}
-            className="absolute inset-0 flex flex-col"
+            className="page-wrapper"
           >
             <PageComponent />
           </motion.div>
         </AnimatePresence>
       </div>
       
-      {/* Bottom Navigation */}
       <BottomNav />
     </div>
   );

@@ -7,25 +7,6 @@
 :root {
   --safe-area-top: env(safe-area-inset-top, 0px);
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
-  --primary-50: #eff6ff;
-  --primary-100: #dbeafe;
-  --primary-200: #bfdbfe;
-  --primary-300: #93c5fd;
-  --primary-400: #60a5fa;
-  --primary-500: #3b82f6;
-  --primary-600: #2563eb;
-  --primary-700: #1d4ed8;
-  --primary-800: #1e40af;
-  --primary-900: #1e3a8a;
-  --background: #f8fafc;
-  --surface: #ffffff;
-  --surface-dark: #f1f5f9;
-  --foreground: #0f172a;
-  --muted: #64748b;
-  --border: #e2e8f0;
-  --success: #22c55e;
-  --warning: #f59e0b;
-  --danger: #ef4444;
 }
 
 * {
@@ -35,11 +16,21 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-html, body {
+html {
   width: 100%;
   height: 100%;
+  height: -webkit-fill-available;
   overflow: hidden;
-  background-color: var(--background);
+  background-color: #f8fafc;
+}
+
+body {
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  overflow: hidden;
+  background-color: #f8fafc;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -51,12 +42,55 @@ html, body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* App Layout */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #f8fafc;
+  position: relative;
+}
+
+.app-content {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+.page-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Scrollable page content */
+.page-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 3px;
+  height: 3px;
 }
 
 ::-webkit-scrollbar-track {
@@ -64,78 +98,121 @@ html, body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 4px;
+  background: #cbd5e1;
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--muted);
+  background: #94a3b8;
 }
 
-/* Input styles */
-input, textarea, select {
+/* Card base styles */
+.card {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.08), 0 1px 2px -1px rgb(0 0 0 / 0.08);
+}
+
+.card-interactive {
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.card-interactive:active {
+  transform: scale(0.98);
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+/* Button base */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  transition: all 0.15s ease;
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: pointer;
+  border: none;
   outline: none;
-  font-family: inherit;
 }
 
-input:focus, textarea:focus, select:focus {
-  outline: none;
-}
-
-/* Button press effect */
-.btn-press {
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
-}
-
-.btn-press:active {
+.btn:active {
   transform: scale(0.97);
 }
 
-/* Card styles */
-.card {
-  background: var(--surface);
-  border-radius: 16px;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 
-.card-hover {
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+.btn-primary {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: white;
 }
 
-.card-hover:active {
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  transform: scale(0.98);
+.btn-primary:active:not(:disabled) {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+}
+
+.btn-secondary {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.btn-secondary:active:not(:disabled) {
+  background: #e2e8f0;
+}
+
+/* Input styles */
+.input-field {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  font-size: 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.75rem;
+  background: white;
+  color: #0f172a;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  outline: none;
+}
+
+.input-field:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.input-field::placeholder {
+  color: #94a3b8;
+}
+
+.input-error {
+  border-color: #ef4444;
+}
+
+.input-error:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
 }
 
 /* Safe area padding */
 .pt-safe {
-  padding-top: var(--safe-area-top);
+  padding-top: max(var(--safe-area-top), 0.5rem);
 }
 
 .pb-safe {
-  padding-bottom: var(--safe-area-bottom);
+  padding-bottom: max(var(--safe-area-bottom), 0.5rem);
 }
 
-/* Skeleton loading */
-.skeleton {
-  background: linear-gradient(90deg, var(--surface-dark) 25%, var(--border) 50%, var(--surface-dark) 75%);
-  background-size: 200% 100%;
-  animation: skeleton 1.5s ease-in-out infinite;
-}
-
-@keyframes skeleton {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
-}
-
-/* No text selection for app-like feel */
-.no-select {
-  -webkit-user-select: none;
-  user-select: none;
+/* Bottom nav safe padding */
+.pb-nav {
+  padding-bottom: calc(5rem + var(--safe-area-bottom));
 }
 
 /* Hide number input spinners */
@@ -147,4 +224,29 @@ input[type="number"]::-webkit-outer-spin-button {
 
 input[type="number"] {
   -moz-appearance: textfield;
+}
+
+/* Skeleton loading */
+.skeleton {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: skeleton 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Prevent text selection on interactive elements */
+button, .no-select {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Fix for iOS input zoom */
+@media screen and (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
 }

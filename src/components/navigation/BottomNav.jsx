@@ -13,9 +13,14 @@ const navItems = [
 export function BottomNav() {
   const { currentPage, setPage } = useNavigationStore();
 
+  const handleNavClick = (e, pageId) => {
+    e.stopPropagation();
+    setPage(pageId);
+  };
+
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-surface shadow-bottom-nav border-t border-border pb-safe z-50">
-      <div className="max-w-lg mx-auto flex items-center justify-around px-2 py-1">
+    <nav className="flex-shrink-0 bg-white border-t border-slate-200 pb-safe z-50">
+      <div className="max-w-lg mx-auto flex items-center justify-around px-2 py-1.5">
         {navItems.map((item) => {
           const isActive = currentPage === item.id;
           const Icon = item.icon;
@@ -23,11 +28,12 @@ export function BottomNav() {
           return (
             <motion.button
               key={item.id}
-              onClick={() => setPage(item.id)}
+              type="button"
+              onClick={(e) => handleNavClick(e, item.id)}
               className={`
-                flex flex-col items-center justify-center py-2 px-4 rounded-xl
-                transition-colors duration-150 no-select relative
-                ${isActive ? 'text-primary-600' : 'text-muted'}
+                flex flex-col items-center justify-center py-2 px-3 rounded-xl
+                transition-colors duration-150 select-none relative min-w-[56px]
+                ${isActive ? 'text-blue-600' : 'text-slate-400'}
               `}
               whileTap={{ scale: 0.9 }}
             >
@@ -39,13 +45,12 @@ export function BottomNav() {
                 {isActive && (
                   <motion.div
                     layoutId="activeTab"
-                    className="absolute -bottom-1 left-1/2 w-1 h-1 bg-primary-600 rounded-full"
-                    style={{ x: '-50%' }}
+                    className="absolute -bottom-1 left-1/2 w-1 h-1 bg-blue-600 rounded-full -translate-x-1/2"
                     transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                   />
                 )}
               </div>
-              <span className={`text-xs mt-1 font-medium ${isActive ? 'font-semibold' : ''}`}>
+              <span className={`text-[10px] mt-1 ${isActive ? 'font-semibold' : 'font-medium'}`}>
                 {item.label}
               </span>
             </motion.button>

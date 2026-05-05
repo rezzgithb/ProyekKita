@@ -1,24 +1,23 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Calculator, Calendar, Briefcase, Info } from 'lucide-react';
+import { Users, Calculator, Briefcase, Info } from 'lucide-react';
 import { Header } from '../../components/navigation/Header';
 import { Card, Button, Input, Select, Alert } from '../../components/ui';
 import { formatRupiah, validatePositiveNumber } from '../../utils/helpers';
 
-// Data standar upah area Bogor (April 2026)
 const UPAH_HARIAN = {
-  tukang: 180000,    // Tukang batu/kayu
-  kenek: 120000,     // Kenek/pembantu
-  mandor: 250000,    // Mandor
+  tukang: 180000,
+  kenek: 120000,
+  mandor: 250000,
 };
 
 const UPAH_BORONGAN = {
-  pondasiPerM: 150000,      // Per meter lari pondasi
-  dindingPerM2: 85000,      // Per m² dinding
-  plafonPerM2: 65000,       // Per m² plafon
-  keramikPerM2: 45000,      // Per m² pasang keramik
-  catPerM2: 25000,          // Per m² cat
-  atapPerM2: 120000,        // Per m² atap
+  pondasiPerM: 150000,
+  dindingPerM2: 85000,
+  plafonPerM2: 65000,
+  keramikPerM2: 45000,
+  catPerM2: 25000,
+  atapPerM2: 120000,
 };
 
 const sistemOptions = [
@@ -28,14 +27,14 @@ const sistemOptions = [
 
 const pekerjaanOptions = [
   { value: 'pondasi', label: 'Pondasi (per meter lari)', harga: UPAH_BORONGAN.pondasiPerM },
-  { value: 'dinding', label: 'Pasang Dinding (per m²)', harga: UPAH_BORONGAN.dindingPerM2 },
-  { value: 'plafon', label: 'Plafon (per m²)', harga: UPAH_BORONGAN.plafonPerM2 },
-  { value: 'keramik', label: 'Pasang Keramik (per m²)', harga: UPAH_BORONGAN.keramikPerM2 },
-  { value: 'cat', label: 'Pengecatan (per m²)', harga: UPAH_BORONGAN.catPerM2 },
-  { value: 'atap', label: 'Atap (per m²)', harga: UPAH_BORONGAN.atapPerM2 },
+  { value: 'dinding', label: 'Pasang Dinding (per m2)', harga: UPAH_BORONGAN.dindingPerM2 },
+  { value: 'plafon', label: 'Plafon (per m2)', harga: UPAH_BORONGAN.plafonPerM2 },
+  { value: 'keramik', label: 'Pasang Keramik (per m2)', harga: UPAH_BORONGAN.keramikPerM2 },
+  { value: 'cat', label: 'Pengecatan (per m2)', harga: UPAH_BORONGAN.catPerM2 },
+  { value: 'atap', label: 'Atap (per m2)', harga: UPAH_BORONGAN.atapPerM2 },
 ];
 
-export function KalkulatorUpahPage() {
+export function KalkulatorUpahPage({ onBack }) {
   const [sistem, setSistem] = useState('harian');
   const [input, setInput] = useState({
     jumlahTukang: '',
@@ -124,24 +123,27 @@ export function KalkulatorUpahPage() {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="page-wrapper">
       <Header 
         title="Kalkulator Upah" 
         subtitle="Estimasi biaya tukang"
+        showBack
+        onBack={onBack}
       />
       
-      <div className="flex-1 overflow-y-auto pb-4">
+      <div className="page-scroll pb-nav">
         <div className="max-w-lg mx-auto px-4 py-4 space-y-4">
           {/* System Selection */}
           <Card className="p-4 space-y-4">
             <div className="flex items-center gap-2">
-              <Calculator size={20} className="text-primary-600" />
-              <span className="font-semibold text-foreground">Pilih Sistem Upah</span>
+              <Calculator size={20} className="text-blue-600" />
+              <span className="font-semibold text-slate-800">Pilih Sistem Upah</span>
             </div>
             
             <div className="grid grid-cols-2 gap-2">
               {sistemOptions.map(opt => (
-                <motion.button
+                <button
+                  type="button"
                   key={opt.value}
                   onClick={() => {
                     setSistem(opt.value);
@@ -149,13 +151,12 @@ export function KalkulatorUpahPage() {
                   }}
                   className={`p-3 rounded-xl border-2 text-center font-medium transition-colors ${
                     sistem === opt.value
-                      ? 'border-primary-500 bg-primary-50 text-primary-700'
-                      : 'border-border bg-surface text-muted hover:border-primary-300'
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-slate-200 bg-white text-slate-500 active:border-blue-300'
                   }`}
-                  whileTap={{ scale: 0.98 }}
                 >
                   {opt.label}
-                </motion.button>
+                </button>
               ))}
             </div>
           </Card>
@@ -173,7 +174,7 @@ export function KalkulatorUpahPage() {
                 >
                   <div className="flex items-center gap-2">
                     <Users size={20} className="text-blue-500" />
-                    <span className="font-semibold text-foreground">Sistem Harian</span>
+                    <span className="font-semibold text-slate-800">Sistem Harian</span>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-3">
@@ -206,10 +207,10 @@ export function KalkulatorUpahPage() {
                     error={errors.jumlahHari}
                   />
                   
-                  <div className="p-3 bg-surface-dark rounded-xl space-y-1">
-                    <p className="text-xs text-muted">Standar upah harian (Bogor, Apr 2026):</p>
-                    <p className="text-sm"><span className="text-foreground font-medium">Tukang:</span> {formatRupiah(UPAH_HARIAN.tukang)}/hari</p>
-                    <p className="text-sm"><span className="text-foreground font-medium">Kenek:</span> {formatRupiah(UPAH_HARIAN.kenek)}/hari</p>
+                  <div className="p-3 bg-slate-100 rounded-xl space-y-1">
+                    <p className="text-xs text-slate-500">Standar upah harian (Bogor, Apr 2026):</p>
+                    <p className="text-sm"><span className="text-slate-800 font-medium">Tukang:</span> {formatRupiah(UPAH_HARIAN.tukang)}/hari</p>
+                    <p className="text-sm"><span className="text-slate-800 font-medium">Kenek:</span> {formatRupiah(UPAH_HARIAN.kenek)}/hari</p>
                   </div>
                 </motion.div>
               ) : (
@@ -222,7 +223,7 @@ export function KalkulatorUpahPage() {
                 >
                   <div className="flex items-center gap-2">
                     <Briefcase size={20} className="text-emerald-500" />
-                    <span className="font-semibold text-foreground">Sistem Borongan</span>
+                    <span className="font-semibold text-slate-800">Sistem Borongan</span>
                   </div>
                   
                   <Select
@@ -236,7 +237,7 @@ export function KalkulatorUpahPage() {
                     label="Volume Pekerjaan"
                     type="number"
                     placeholder="0"
-                    suffix={input.jenisPekerjaan === 'pondasi' ? 'meter' : 'm²'}
+                    suffix={input.jenisPekerjaan === 'pondasi' ? 'meter' : 'm2'}
                     value={input.volume}
                     onChange={(e) => handleInputChange('volume', e.target.value)}
                     error={errors.volume}
@@ -266,15 +267,15 @@ export function KalkulatorUpahPage() {
               >
                 <Card className="p-4 space-y-4">
                   <div className="flex items-center gap-2">
-                    <Info size={20} className="text-primary-600" />
-                    <span className="font-semibold text-foreground">Hasil Perhitungan</span>
+                    <Info size={20} className="text-blue-600" />
+                    <span className="font-semibold text-slate-800">Hasil Perhitungan</span>
                   </div>
                   
                   <div className="space-y-2">
                     {result.details.map((detail, i) => (
                       <div key={i} className="flex justify-between text-sm">
-                        <span className="text-muted">{detail.label}</span>
-                        <span className="font-medium text-foreground">
+                        <span className="text-slate-500">{detail.label}</span>
+                        <span className="font-medium text-slate-800">
                           {detail.suffix && !detail.suffix.includes('unit') 
                             ? formatRupiah(detail.value) + detail.suffix
                             : detail.suffix 
@@ -286,15 +287,15 @@ export function KalkulatorUpahPage() {
                     ))}
                   </div>
                   
-                  <div className="pt-3 border-t border-border">
+                  <div className="pt-3 border-t border-slate-200">
                     <div className="flex justify-between items-center">
-                      <span className="font-bold text-foreground">Total Upah</span>
-                      <span className="font-bold text-xl text-primary-600">
+                      <span className="font-bold text-slate-800">Total Upah</span>
+                      <span className="font-bold text-xl text-blue-600">
                         {formatRupiah(result.total)}
                       </span>
                     </div>
                     {result.perHari && (
-                      <p className="text-sm text-muted mt-1">
+                      <p className="text-sm text-slate-500 mt-1">
                         Rata-rata {formatRupiah(result.perHari)}/hari
                       </p>
                     )}

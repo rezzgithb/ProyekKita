@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { DollarSign, Package, Layers, Square, Minus, Home, Paintbrush, Grid, Zap, Search, TrendingUp } from 'lucide-react';
+import { Package, Layers, Square, Minus, Home, Paintbrush, Grid, Zap, Search, TrendingUp, ArrowLeft } from 'lucide-react';
 import { Header } from '../../components/navigation/Header';
 import { Card, Alert } from '../../components/ui';
 import { getMaterialPrices, materialCategories } from '../../data/materials';
@@ -14,7 +14,7 @@ const iconMap = {
   Triangle: Square
 };
 
-export function HargaBahanPage() {
+export function HargaBahanPage({ onBack }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   
@@ -27,28 +27,17 @@ export function HargaBahanPage() {
   });
   
   const lastUpdate = materialPrices[0]?.lastUpdate || 'April 2026';
-  
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.03 }
-    }
-  };
-  
-  const itemVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0 }
-  };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="page-wrapper">
       <Header 
         title="Harga Bahan" 
         subtitle={`Update: ${lastUpdate}`}
+        showBack
+        onBack={onBack}
       />
       
-      <div className="flex-1 overflow-y-auto pb-4">
+      <div className="page-scroll pb-nav">
         <div className="max-w-lg mx-auto px-4 py-4 space-y-4">
           {/* Info */}
           <Alert variant="info">
@@ -57,36 +46,38 @@ export function HargaBahanPage() {
           
           {/* Search */}
           <div className="relative">
-            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" />
+            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Cari bahan..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 rounded-xl bg-surface border-2 border-border focus:border-primary-500 transition-colors text-foreground placeholder:text-muted/60"
+              className="w-full pl-11 pr-4 py-3 rounded-xl bg-white border-2 border-slate-200 focus:border-blue-500 transition-colors text-slate-800 placeholder:text-slate-400 outline-none"
             />
           </div>
           
           {/* Category Filter */}
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+          <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4">
             <button
+              type="button"
               onClick={() => setSelectedCategory('all')}
               className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                 selectedCategory === 'all' 
-                  ? 'bg-primary-600 text-white' 
-                  : 'bg-surface-dark text-muted hover:bg-border'
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-slate-100 text-slate-600 active:bg-slate-200'
               }`}
             >
               Semua
             </button>
             {materialCategories.map(cat => (
               <button
+                type="button"
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
                 className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                   selectedCategory === cat.id 
-                    ? 'bg-primary-600 text-white' 
-                    : 'bg-surface-dark text-muted hover:bg-border'
+                    ? 'bg-blue-600 text-white' 
+                    : 'bg-slate-100 text-slate-600 active:bg-slate-200'
                 }`}
               >
                 {cat.name}
@@ -96,25 +87,29 @@ export function HargaBahanPage() {
           
           {/* Materials List */}
           <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             className="space-y-2"
           >
-            {filteredMaterials.map((mat) => {
+            {filteredMaterials.map((mat, index) => {
               const Icon = iconMap[mat.icon] || Package;
               return (
-                <motion.div key={mat.id} variants={itemVariants}>
+                <motion.div 
+                  key={mat.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.02 }}
+                >
                   <Card className="p-4 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <Icon size={24} className="text-primary-600" />
+                    <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Icon size={24} className="text-blue-600" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-foreground truncate">{mat.name}</h3>
-                      <p className="text-xs text-muted">per {mat.unit}</p>
+                      <h3 className="font-semibold text-slate-800 truncate">{mat.name}</h3>
+                      <p className="text-xs text-slate-500">per {mat.unit}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-primary-600">{formatRupiah(mat.currentPrice)}</p>
+                      <p className="font-bold text-blue-600">{formatRupiah(mat.currentPrice)}</p>
                       <div className="flex items-center gap-1 text-xs text-emerald-600">
                         <TrendingUp size={12} />
                         <span>+2%</span>
@@ -128,7 +123,7 @@ export function HargaBahanPage() {
           
           {filteredMaterials.length === 0 && (
             <div className="text-center py-8">
-              <p className="text-muted">Tidak ada bahan yang cocok</p>
+              <p className="text-slate-500">Tidak ada bahan yang cocok</p>
             </div>
           )}
         </div>

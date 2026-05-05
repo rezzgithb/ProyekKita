@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ListTodo, Plus, Trash2, Check, Calendar, Users, RotateCcw, ChevronDown, ChevronRight, X } from 'lucide-react';
+import { ListTodo, Plus, Check, Calendar, Users, RotateCcw, ChevronDown, ChevronRight, X } from 'lucide-react';
 import { Header } from '../../components/navigation/Header';
 import { Card, Button, Input, Alert, ConfirmModal } from '../../components/ui';
 import { useTodoStore } from '../../store';
 import { validatePositiveNumber } from '../../utils/helpers';
 
-export function TodoProyekPage() {
+export function TodoProyekPage({ onBack }) {
   const { todoConfig, setTodoConfig, days, generateDays, addTask, toggleTask, deleteTask, resetTodo } = useTodoStore();
   const [input, setInput] = useState({
     jumlahTukang: todoConfig.jumlahTukang || '',
@@ -49,8 +49,6 @@ export function TodoProyekPage() {
     
     setTodoConfig(config);
     generateDays(config.estimasiHari);
-    
-    // Expand first day by default
     setExpandedDays({ 0: true });
   };
   
@@ -78,24 +76,26 @@ export function TodoProyekPage() {
   const progress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="page-wrapper">
       <Header 
         title="To-Do Proyek" 
         subtitle={days.length > 0 ? `${completedTasks}/${totalTasks} task selesai` : 'Atur jadwal kerja'}
+        showBack
+        onBack={onBack}
         rightAction={
           days.length > 0 && (
-            <motion.button
+            <button
+              type="button"
               onClick={() => setShowResetConfirm(true)}
-              className="p-2 rounded-xl hover:bg-red-50 active:bg-red-100 transition-colors"
-              whileTap={{ scale: 0.9 }}
+              className="p-2 rounded-xl active:bg-red-50 transition-colors"
             >
-              <RotateCcw size={20} className="text-danger" />
-            </motion.button>
+              <RotateCcw size={20} className="text-red-500" />
+            </button>
           )
         }
       />
       
-      <div className="flex-1 overflow-y-auto pb-4">
+      <div className="page-scroll pb-nav">
         <div className="max-w-lg mx-auto px-4 py-4 space-y-4">
           {/* Setup Form */}
           {days.length === 0 && (
@@ -105,8 +105,8 @@ export function TodoProyekPage() {
             >
               <Card className="p-4 space-y-4">
                 <div className="flex items-center gap-2">
-                  <ListTodo size={20} className="text-primary-600" />
-                  <span className="font-semibold text-foreground">Setup Proyek</span>
+                  <ListTodo size={20} className="text-blue-600" />
+                  <span className="font-semibold text-slate-800">Setup Proyek</span>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-3">
@@ -151,23 +151,23 @@ export function TodoProyekPage() {
               <Card className="p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Users size={18} className="text-primary-600" />
-                    <span className="text-sm font-medium text-foreground">{todoConfig.jumlahTukang} Tukang</span>
+                    <Users size={18} className="text-blue-600" />
+                    <span className="text-sm font-medium text-slate-800">{todoConfig.jumlahTukang} Tukang</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar size={18} className="text-emerald-500" />
-                    <span className="text-sm font-medium text-foreground">{days.length} Hari</span>
+                    <span className="text-sm font-medium text-slate-800">{days.length} Hari</span>
                   </div>
                 </div>
                 
                 <div>
                   <div className="flex justify-between text-sm mb-1">
-                    <span className="text-muted">Progress</span>
-                    <span className="font-medium text-foreground">{progress.toFixed(0)}%</span>
+                    <span className="text-slate-500">Progress</span>
+                    <span className="font-medium text-slate-800">{progress.toFixed(0)}%</span>
                   </div>
-                  <div className="h-3 bg-surface-dark rounded-full overflow-hidden">
+                  <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
                     <motion.div
-                      className="h-full bg-gradient-to-r from-primary-500 to-emerald-500 rounded-full"
+                      className="h-full bg-gradient-to-r from-blue-500 to-emerald-500 rounded-full"
                       initial={{ width: 0 }}
                       animate={{ width: `${progress}%` }}
                       transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -200,18 +200,18 @@ export function TodoProyekPage() {
                   >
                     <Card className={`overflow-hidden ${isDayComplete ? 'ring-2 ring-emerald-500' : ''}`}>
                       {/* Day Header */}
-                      <motion.button
+                      <button
+                        type="button"
                         onClick={() => toggleExpand(dayIndex)}
-                        className="w-full p-4 flex items-center justify-between hover:bg-surface-dark transition-colors"
-                        whileTap={{ scale: 0.99 }}
+                        className="w-full p-4 flex items-center justify-between active:bg-slate-50 transition-colors text-left"
                       >
                         <div className="flex items-center gap-3">
-                          {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
-                          <div className="text-left">
-                            <h3 className={`font-bold ${isDayComplete ? 'text-emerald-600' : 'text-foreground'}`}>
+                          {isExpanded ? <ChevronDown size={18} className="text-slate-500" /> : <ChevronRight size={18} className="text-slate-500" />}
+                          <div>
+                            <h3 className={`font-bold ${isDayComplete ? 'text-emerald-600' : 'text-slate-800'}`}>
                               Day {day.day}
                             </h3>
-                            <p className="text-xs text-muted">
+                            <p className="text-xs text-slate-500">
                               {dayTotal === 0 ? 'Belum ada task' : `${dayCompleted}/${dayTotal} selesai`}
                             </p>
                           </div>
@@ -221,7 +221,7 @@ export function TodoProyekPage() {
                             <Check size={18} className="text-emerald-600" />
                           </div>
                         )}
-                      </motion.button>
+                      </button>
                       
                       {/* Day Content */}
                       <AnimatePresence>
@@ -241,32 +241,32 @@ export function TodoProyekPage() {
                                   initial={{ opacity: 0, x: -10 }}
                                   animate={{ opacity: 1, x: 0 }}
                                   className={`flex items-center gap-3 p-3 rounded-xl ${
-                                    task.completed ? 'bg-emerald-50' : 'bg-surface-dark'
+                                    task.completed ? 'bg-emerald-50' : 'bg-slate-100'
                                   }`}
                                 >
-                                  <motion.button
+                                  <button
+                                    type="button"
                                     onClick={() => toggleTask(dayIndex, task.id)}
                                     className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-colors ${
                                       task.completed 
                                         ? 'bg-emerald-500 border-emerald-500' 
-                                        : 'border-border hover:border-primary-500'
+                                        : 'border-slate-300 active:border-blue-500'
                                     }`}
-                                    whileTap={{ scale: 0.9 }}
                                   >
                                     {task.completed && <Check size={14} className="text-white" />}
-                                  </motion.button>
+                                  </button>
                                   <span className={`flex-1 text-sm ${
-                                    task.completed ? 'text-muted line-through' : 'text-foreground'
+                                    task.completed ? 'text-slate-400 line-through' : 'text-slate-800'
                                   }`}>
                                     {task.text}
                                   </span>
-                                  <motion.button
+                                  <button
+                                    type="button"
                                     onClick={() => deleteTask(dayIndex, task.id)}
-                                    className="p-1.5 rounded-lg hover:bg-red-100 active:bg-red-200 transition-colors"
-                                    whileTap={{ scale: 0.9 }}
+                                    className="p-1.5 rounded-lg active:bg-red-100 transition-colors"
                                   >
-                                    <X size={14} className="text-danger" />
-                                  </motion.button>
+                                    <X size={14} className="text-red-500" />
+                                  </button>
                                 </motion.div>
                               ))}
                               
@@ -278,7 +278,7 @@ export function TodoProyekPage() {
                                   value={newTaskText[dayIndex] || ''}
                                   onChange={(e) => setNewTaskText({ ...newTaskText, [dayIndex]: e.target.value })}
                                   onKeyDown={(e) => e.key === 'Enter' && handleAddTask(dayIndex)}
-                                  className="flex-1 px-3 py-2 rounded-xl bg-surface border-2 border-border focus:border-primary-500 transition-colors text-sm text-foreground placeholder:text-muted/60"
+                                  className="flex-1 px-3 py-2 rounded-xl bg-white border-2 border-slate-200 focus:border-blue-500 transition-colors text-sm text-slate-800 placeholder:text-slate-400 outline-none"
                                 />
                                 <Button 
                                   size="icon"

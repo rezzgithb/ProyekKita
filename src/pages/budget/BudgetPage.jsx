@@ -44,163 +44,108 @@ export function BudgetPage() {
     
     setCalculating(true);
     
-    // Simulasi loading
     setTimeout(() => {
       const panjang = parseFloat(landInput.panjang);
       const lebar = parseFloat(landInput.lebar);
       const budget = parseFloat(landInput.budget);
       const luasTanah = calculateArea(panjang, lebar);
       
-      // Asumsi: luas bangunan = 60% dari luas tanah (sisanya halaman)
       const luasBangunan = luasTanah * 0.6;
-      // Tinggi dinding standar 3m
       const tinggiDinding = 3;
-      // Keliling bangunan (asumsi bentuk persegi)
       const sisi = Math.sqrt(luasBangunan);
       const kelilingBangunan = sisi * 4;
-      // Luas dinding total (keliling x tinggi)
       const luasDinding = kelilingBangunan * tinggiDinding;
-      // Luas atap (lebih besar dari lantai karena overstek)
       const luasAtap = luasBangunan * 1.15;
       
-      // Hitung kebutuhan bahan berdasarkan standar per m²
       const materials = [];
       let totalEstimasi = 0;
       
-      // Ambil harga dari data
-      const getPrice = (id) => {
-        const mat = materialPrices.find(m => m.id === id);
-        return mat ? mat.currentPrice : 0;
-      };
-      
-      // 1. Pondasi (asumsi lebar pondasi mengikuti keliling bangunan, lebar 0.6m)
       const luasPondasi = kelilingBangunan * 0.6;
       Object.entries(materialStandards.pondasi).forEach(([materialId, perM2]) => {
         const mat = materialPrices.find(m => m.id === materialId);
         if (mat) {
           const qty = Math.ceil(luasPondasi * perM2);
           const subtotal = qty * mat.currentPrice;
-          materials.push({
-            ...mat,
-            kategori: 'Pondasi',
-            qty,
-            subtotal
-          });
+          materials.push({ ...mat, kategori: 'Pondasi', qty, subtotal });
           totalEstimasi += subtotal;
         }
       });
       
-      // 2. Struktur (kolom, balok, sloof)
       Object.entries(materialStandards.struktur).forEach(([materialId, perM2]) => {
         const mat = materialPrices.find(m => m.id === materialId);
         if (mat) {
           const existing = materials.find(m => m.id === materialId);
           const qty = Math.ceil(luasBangunan * perM2);
           const subtotal = qty * mat.currentPrice;
-          
           if (existing) {
             existing.qty += qty;
             existing.subtotal += subtotal;
           } else {
-            materials.push({
-              ...mat,
-              kategori: 'Struktur',
-              qty,
-              subtotal
-            });
+            materials.push({ ...mat, kategori: 'Struktur', qty, subtotal });
           }
           totalEstimasi += subtotal;
         }
       });
       
-      // 3. Dinding
       Object.entries(materialStandards.dinding).forEach(([materialId, perM2]) => {
         const mat = materialPrices.find(m => m.id === materialId);
         if (mat) {
           const existing = materials.find(m => m.id === materialId);
           const qty = Math.ceil(luasDinding * perM2);
           const subtotal = qty * mat.currentPrice;
-          
           if (existing) {
             existing.qty += qty;
             existing.subtotal += subtotal;
           } else {
-            materials.push({
-              ...mat,
-              kategori: 'Dinding',
-              qty,
-              subtotal
-            });
+            materials.push({ ...mat, kategori: 'Dinding', qty, subtotal });
           }
           totalEstimasi += subtotal;
         }
       });
       
-      // 4. Atap
       Object.entries(materialStandards.atap).forEach(([materialId, perM2]) => {
         const mat = materialPrices.find(m => m.id === materialId);
         if (mat) {
           const qty = Math.ceil(luasAtap * perM2);
           const subtotal = qty * mat.currentPrice;
-          materials.push({
-            ...mat,
-            kategori: 'Atap',
-            qty,
-            subtotal
-          });
+          materials.push({ ...mat, kategori: 'Atap', qty, subtotal });
           totalEstimasi += subtotal;
         }
       });
       
-      // 5. Lantai
       Object.entries(materialStandards.lantai).forEach(([materialId, perM2]) => {
         const mat = materialPrices.find(m => m.id === materialId);
         if (mat) {
           const existing = materials.find(m => m.id === materialId);
           const qty = Math.ceil(luasBangunan * perM2);
           const subtotal = qty * mat.currentPrice;
-          
           if (existing) {
             existing.qty += qty;
             existing.subtotal += subtotal;
           } else {
-            materials.push({
-              ...mat,
-              kategori: 'Lantai',
-              qty,
-              subtotal
-            });
+            materials.push({ ...mat, kategori: 'Lantai', qty, subtotal });
           }
           totalEstimasi += subtotal;
         }
       });
       
-      // 6. Finishing
       Object.entries(materialStandards.finishing).forEach(([materialId, perM2]) => {
         const mat = materialPrices.find(m => m.id === materialId);
         if (mat) {
           const existing = materials.find(m => m.id === materialId);
-          // Finishing untuk dinding dalam dan luar
           const totalLuasFinishing = luasDinding * 2;
           const qty = Math.ceil(totalLuasFinishing * perM2);
           const subtotal = qty * mat.currentPrice;
-          
           if (existing) {
             existing.qty += qty;
             existing.subtotal += subtotal;
           } else {
-            materials.push({
-              ...mat,
-              kategori: 'Finishing',
-              qty,
-              subtotal
-            });
+            materials.push({ ...mat, kategori: 'Finishing', qty, subtotal });
           }
           totalEstimasi += subtotal;
         }
       });
       
-      // Konsolidasi material yang sama
       const consolidatedMaterials = [];
       materials.forEach(mat => {
         const existing = consolidatedMaterials.find(m => m.id === mat.id);
@@ -212,7 +157,6 @@ export function BudgetPage() {
         }
       });
       
-      // Sort berdasarkan subtotal terbesar
       consolidatedMaterials.sort((a, b) => b.subtotal - a.subtotal);
       
       setResult({
@@ -228,7 +172,7 @@ export function BudgetPage() {
       });
       
       setCalculating(false);
-    }, 800);
+    }, 600);
   };
   
   const resetForm = () => {
@@ -238,22 +182,16 @@ export function BudgetPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden">
-      <Header 
-        title="Hitung Budget" 
-        subtitle="Estimasi biaya bangunan"
-      />
+    <div className="page-wrapper">
+      <Header title="Hitung Budget" subtitle="Estimasi biaya bangunan" />
       
-      <div className="flex-1 overflow-y-auto pb-24">
+      <div className="page-scroll pb-nav">
         <div className="max-w-lg mx-auto px-4 py-4 space-y-4">
           {/* Input Form */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <Card className="p-4 space-y-4">
-              <div className="flex items-center gap-2 text-foreground">
-                <Calculator size={20} className="text-primary-600" />
+              <div className="flex items-center gap-2 text-slate-800">
+                <Calculator size={20} className="text-blue-600" />
                 <span className="font-semibold">Input Data Tanah</span>
               </div>
               
@@ -284,12 +222,12 @@ export function BudgetPage() {
                 <motion.div
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
-                  className="p-3 bg-primary-50 rounded-xl"
+                  className="p-3 bg-blue-50 rounded-xl"
                 >
-                  <p className="text-sm text-primary-800">
+                  <p className="text-sm text-blue-800">
                     <span className="font-medium">Luas Tanah:</span>{' '}
                     <span className="font-bold">
-                      {calculateArea(landInput.panjang, landInput.lebar)} m²
+                      {calculateArea(landInput.panjang, landInput.lebar)} m2
                     </span>
                   </p>
                 </motion.div>
@@ -306,18 +244,10 @@ export function BudgetPage() {
               />
               
               <div className="flex gap-3 pt-2">
-                <Button 
-                  variant="secondary" 
-                  onClick={resetForm}
-                  disabled={calculating}
-                >
+                <Button variant="secondary" onClick={resetForm} disabled={calculating}>
                   Reset
                 </Button>
-                <Button 
-                  onClick={calculateBudget} 
-                  fullWidth
-                  disabled={calculating}
-                >
+                <Button onClick={calculateBudget} fullWidth disabled={calculating}>
                   {calculating ? (
                     <motion.div
                       animate={{ rotate: 360 }}
@@ -347,34 +277,34 @@ export function BudgetPage() {
                 {/* Summary Card */}
                 <Card className="p-4 space-y-4">
                   <div className="flex items-center gap-2">
-                    <Info size={20} className="text-primary-600" />
-                    <span className="font-semibold text-foreground">Ringkasan Estimasi</span>
+                    <Info size={20} className="text-blue-600" />
+                    <span className="font-semibold text-slate-800">Ringkasan Estimasi</span>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 bg-surface-dark rounded-xl">
-                      <p className="text-xs text-muted">Luas Tanah</p>
-                      <p className="text-lg font-bold text-foreground">{result.luasTanah} m²</p>
+                    <div className="p-3 bg-slate-100 rounded-xl">
+                      <p className="text-xs text-slate-500">Luas Tanah</p>
+                      <p className="text-lg font-bold text-slate-800">{result.luasTanah} m2</p>
                     </div>
-                    <div className="p-3 bg-surface-dark rounded-xl">
-                      <p className="text-xs text-muted">Luas Bangunan</p>
-                      <p className="text-lg font-bold text-foreground">{result.luasBangunan.toFixed(0)} m²</p>
+                    <div className="p-3 bg-slate-100 rounded-xl">
+                      <p className="text-xs text-slate-500">Luas Bangunan</p>
+                      <p className="text-lg font-bold text-slate-800">{result.luasBangunan.toFixed(0)} m2</p>
                     </div>
                   </div>
                   
-                  <div className="p-4 bg-primary-50 rounded-xl space-y-2">
+                  <div className="p-4 bg-blue-50 rounded-xl space-y-2">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-primary-700">Budget Anda</span>
-                      <span className="font-bold text-primary-800">{formatRupiah(result.budget)}</span>
+                      <span className="text-sm text-blue-700">Budget Anda</span>
+                      <span className="font-bold text-blue-800">{formatRupiah(result.budget)}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-primary-700">Estimasi Biaya</span>
-                      <span className="font-bold text-primary-800">{formatRupiah(result.totalEstimasi)}</span>
+                      <span className="text-sm text-blue-700">Estimasi Biaya</span>
+                      <span className="font-bold text-blue-800">{formatRupiah(result.totalEstimasi)}</span>
                     </div>
-                    <div className="border-t border-primary-200 pt-2 mt-2">
+                    <div className="border-t border-blue-200 pt-2 mt-2">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-primary-700">Selisih</span>
-                        <span className={`font-bold ${result.selisih >= 0 ? 'text-success' : 'text-danger'}`}>
+                        <span className="text-sm font-medium text-blue-700">Selisih</span>
+                        <span className={`font-bold ${result.selisih >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
                           {result.selisih >= 0 ? '+' : ''}{formatRupiah(result.selisih)}
                         </span>
                       </div>
@@ -396,17 +326,17 @@ export function BudgetPage() {
                 
                 {/* Material Details */}
                 <Card className="overflow-hidden">
-                  <motion.button
+                  <button
+                    type="button"
                     onClick={() => setShowDetails(!showDetails)}
-                    className="w-full p-4 flex items-center justify-between hover:bg-surface-dark transition-colors"
-                    whileTap={{ scale: 0.98 }}
+                    className="w-full p-4 flex items-center justify-between active:bg-slate-50 transition-colors"
                   >
                     <div className="flex items-center gap-2">
-                      <Package size={20} className="text-primary-600" />
-                      <span className="font-semibold text-foreground">Detail Kebutuhan Bahan</span>
+                      <Package size={20} className="text-blue-600" />
+                      <span className="font-semibold text-slate-800">Detail Kebutuhan Bahan</span>
                     </div>
-                    {showDetails ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                  </motion.button>
+                    {showDetails ? <ChevronUp size={20} className="text-slate-400" /> : <ChevronDown size={20} className="text-slate-400" />}
+                  </button>
                   
                   <AnimatePresence>
                     {showDetails && (
@@ -418,7 +348,7 @@ export function BudgetPage() {
                         className="overflow-hidden"
                       >
                         <div className="px-4 pb-4 space-y-2">
-                          <p className="text-xs text-muted mb-3">
+                          <p className="text-xs text-slate-500 mb-3">
                             Harga update: {result.priceDate} (Area Bogor)
                           </p>
                           
@@ -427,25 +357,25 @@ export function BudgetPage() {
                               key={mat.id}
                               initial={{ opacity: 0, x: -10 }}
                               animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: index * 0.05 }}
-                              className="flex items-center justify-between py-2 border-b border-border last:border-0"
+                              transition={{ delay: index * 0.03 }}
+                              className="flex items-center justify-between py-2 border-b border-slate-100 last:border-0"
                             >
                               <div className="flex-1">
-                                <p className="font-medium text-foreground text-sm">{mat.name}</p>
-                                <p className="text-xs text-muted">
-                                  {mat.qty.toLocaleString('id-ID')} {mat.unit} × {formatRupiah(mat.currentPrice)}
+                                <p className="font-medium text-slate-800 text-sm">{mat.name}</p>
+                                <p className="text-xs text-slate-500">
+                                  {mat.qty.toLocaleString('id-ID')} {mat.unit} x {formatRupiah(mat.currentPrice)}
                                 </p>
                               </div>
-                              <p className="font-semibold text-foreground">
+                              <p className="font-semibold text-slate-800">
                                 {formatRupiah(mat.subtotal)}
                               </p>
                             </motion.div>
                           ))}
                           
-                          <div className="pt-3 mt-3 border-t-2 border-primary-200">
+                          <div className="pt-3 mt-3 border-t-2 border-blue-200">
                             <div className="flex justify-between items-center">
-                              <span className="font-bold text-foreground">Total Estimasi</span>
-                              <span className="font-bold text-xl text-primary-600">
+                              <span className="font-bold text-slate-800">Total Estimasi</span>
+                              <span className="font-bold text-xl text-blue-600">
                                 {formatRupiah(result.totalEstimasi)}
                               </span>
                             </div>
