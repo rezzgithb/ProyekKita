@@ -1,0 +1,1 @@
+export { CatatanPage } from './CatatanPage';
